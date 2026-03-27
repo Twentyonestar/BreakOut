@@ -1,0 +1,214 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" width="1024" height="1024">
+  <defs>
+    <!-- Background gradient -->
+    <linearGradient id="bg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#04050f"/>
+      <stop offset="100%" stop-color="#080d1e"/>
+    </linearGradient>
+    <!-- Cyan glow gradient for ball -->
+    <radialGradient id="ballGrad" cx="38%" cy="35%" r="60%">
+      <stop offset="0%" stop-color="#ffffff"/>
+      <stop offset="40%" stop-color="#00f5ff"/>
+      <stop offset="100%" stop-color="#004cff"/>
+    </radialGradient>
+    <!-- Cyan glow gradient for paddle -->
+    <linearGradient id="paddleGrad" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#00f5ff"/>
+      <stop offset="100%" stop-color="#007aff"/>
+    </linearGradient>
+    <!-- Brick gradients -->
+    <linearGradient id="b1" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#ff3380"/>
+      <stop offset="100%" stop-color="#cc0055"/>
+    </linearGradient>
+    <linearGradient id="b2" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#ff6600"/>
+      <stop offset="100%" stop-color="#cc4400"/>
+    </linearGradient>
+    <linearGradient id="b3" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#ffd700"/>
+      <stop offset="100%" stop-color="#cc9900"/>
+    </linearGradient>
+    <linearGradient id="b4" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#adff2f"/>
+      <stop offset="100%" stop-color="#7acc00"/>
+    </linearGradient>
+    <linearGradient id="b5" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#9933ff"/>
+      <stop offset="100%" stop-color="#6600cc"/>
+    </linearGradient>
+
+    <!-- Filters -->
+    <filter id="cyanGlow" x="-40%" y="-40%" width="180%" height="180%">
+      <feGaussianBlur stdDeviation="8" result="blur"/>
+      <feComposite in="SourceGraphic" in2="blur" operator="over"/>
+    </filter>
+    <filter id="ballGlow" x="-80%" y="-80%" width="260%" height="260%">
+      <feGaussianBlur stdDeviation="18" result="blur"/>
+      <feComposite in="SourceGraphic" in2="blur" operator="over"/>
+    </filter>
+    <filter id="redGlow" x="-40%" y="-40%" width="180%" height="180%">
+      <feGaussianBlur stdDeviation="12" result="blur"/>
+      <feComposite in="SourceGraphic" in2="blur" operator="over"/>
+    </filter>
+    <filter id="outerGlow" x="-5%" y="-5%" width="110%" height="110%">
+      <feGaussianBlur stdDeviation="14" result="blur"/>
+      <feComposite in="SourceGraphic" in2="blur" operator="over"/>
+    </filter>
+    <filter id="innerShadow">
+      <feGaussianBlur stdDeviation="20" result="blur"/>
+      <feOffset dx="0" dy="10"/>
+      <feComposite in="SourceGraphic" operator="over"/>
+    </filter>
+
+    <!-- Scanline pattern -->
+    <pattern id="scanlines" x="0" y="0" width="1024" height="4" patternUnits="userSpaceOnUse">
+      <rect width="1024" height="2" y="0" fill="rgba(0,0,0,0)"/>
+      <rect width="1024" height="2" y="2" fill="rgba(0,0,0,0.13)"/>
+    </pattern>
+
+    <!-- Grid pattern -->
+    <pattern id="grid" x="0" y="0" width="40" height="40" patternUnits="userSpaceOnUse">
+      <path d="M 40 0 L 0 0 0 40" fill="none" stroke="rgba(26,42,108,0.25)" stroke-width="0.7"/>
+    </pattern>
+
+    <!-- Clip to rounded square -->
+    <clipPath id="roundedSquare">
+      <rect x="0" y="0" width="1024" height="1024" rx="200" ry="200"/>
+    </clipPath>
+  </defs>
+
+  <!-- Base shape: rounded square app icon -->
+  <rect x="0" y="0" width="1024" height="1024" rx="200" ry="200" fill="url(#bg)"/>
+
+  <!-- Clip all content -->
+  <g clip-path="url(#roundedSquare)">
+
+    <!-- Grid overlay -->
+    <rect width="1024" height="1024" fill="url(#grid)"/>
+
+    <!-- Ambient glow spots -->
+    <ellipse cx="200" cy="900" rx="300" ry="220" fill="rgba(0,245,255,0.04)"/>
+    <ellipse cx="820" cy="150" rx="260" ry="200" fill="rgba(255,0,110,0.04)"/>
+    <ellipse cx="512" cy="512" rx="400" ry="400" fill="rgba(0,0,40,0.4)"/>
+
+    <!-- ===== BRICKS ===== -->
+    <!-- Row 1 - Pink/Red bricks (5 bricks) -->
+    <g filter="url(#redGlow)">
+      <rect x="72" y="148" width="166" height="72" rx="8" fill="url(#b1)"/>
+      <rect x="252" y="148" width="166" height="72" rx="8" fill="url(#b1)"/>
+      <!-- shattered brick (3rd position, broken) -->
+      <rect x="432" y="148" width="166" height="72" rx="8" fill="url(#b1)" opacity="0.15"/>
+      <!-- crack lines on shattered brick -->
+      <line x1="450" y1="148" x2="470" y2="220" stroke="rgba(255,51,128,0.5)" stroke-width="2"/>
+      <line x1="490" y1="148" x2="472" y2="190" stroke="rgba(255,51,128,0.4)" stroke-width="1.5"/>
+      <line x1="560" y1="158" x2="545" y2="220" stroke="rgba(255,51,128,0.4)" stroke-width="1.5"/>
+      <rect x="612" y="148" width="166" height="72" rx="8" fill="url(#b1)"/>
+      <rect x="792" y="148" width="166" height="72" rx="8" fill="url(#b1)"/>
+    </g>
+
+    <!-- Row 2 - Orange bricks -->
+    <g filter="url(#outerGlow)" opacity="0.9">
+      <rect x="72" y="238" width="166" height="66" rx="8" fill="url(#b2)"/>
+      <rect x="252" y="238" width="166" height="66" rx="8" fill="url(#b2)"/>
+      <rect x="432" y="238" width="166" height="66" rx="8" fill="url(#b2)"/>
+      <rect x="612" y="238" width="166" height="66" rx="8" fill="url(#b2)"/>
+      <rect x="792" y="238" width="166" height="66" rx="8" fill="url(#b2)"/>
+    </g>
+
+    <!-- Row 3 - Yellow bricks (one missing) -->
+    <g opacity="0.85">
+      <rect x="72" y="322" width="166" height="66" rx="8" fill="url(#b3)"/>
+      <!-- gap at 252 - empty -->
+      <rect x="432" y="322" width="166" height="66" rx="8" fill="url(#b3)"/>
+      <rect x="612" y="322" width="166" height="66" rx="8" fill="url(#b3)"/>
+      <rect x="792" y="322" width="166" height="66" rx="8" fill="url(#b3)"/>
+    </g>
+
+    <!-- Row 4 - Green bricks -->
+    <g opacity="0.75">
+      <rect x="72" y="406" width="166" height="66" rx="8" fill="url(#b4)"/>
+      <rect x="252" y="406" width="166" height="66" rx="8" fill="url(#b4)"/>
+      <rect x="432" y="406" width="166" height="66" rx="8" fill="url(#b4)"/>
+      <rect x="612" y="406" width="166" height="66" rx="8" fill="url(#b4)"/>
+      <!-- gap at 792 -->
+    </g>
+
+    <!-- Row 5 - Purple bricks (bottom, dim) -->
+    <g opacity="0.6">
+      <rect x="72" y="490" width="166" height="62" rx="8" fill="url(#b5)"/>
+      <rect x="252" y="490" width="166" height="62" rx="8" fill="url(#b5)"/>
+      <rect x="432" y="490" width="166" height="62" rx="8" fill="url(#b5)"/>
+      <rect x="612" y="490" width="166" height="62" rx="8" fill="url(#b5)"/>
+      <rect x="792" y="490" width="166" height="62" rx="8" fill="url(#b5)"/>
+    </g>
+
+    <!-- Brick shine highlights (top edge) -->
+    <rect x="72" y="148" width="166" height="22" rx="8" fill="rgba(255,255,255,0.18)"/>
+    <rect x="252" y="148" width="166" height="22" rx="8" fill="rgba(255,255,255,0.18)"/>
+    <rect x="612" y="148" width="166" height="22" rx="8" fill="rgba(255,255,255,0.18)"/>
+    <rect x="792" y="148" width="166" height="22" rx="8" fill="rgba(255,255,255,0.18)"/>
+    <rect x="72" y="238" width="166" height="20" rx="8" fill="rgba(255,255,255,0.15)"/>
+    <rect x="252" y="238" width="166" height="20" rx="8" fill="rgba(255,255,255,0.15)"/>
+    <rect x="432" y="238" width="166" height="20" rx="8" fill="rgba(255,255,255,0.15)"/>
+    <rect x="612" y="238" width="166" height="20" rx="8" fill="rgba(255,255,255,0.15)"/>
+    <rect x="792" y="238" width="166" height="20" rx="8" fill="rgba(255,255,255,0.15)"/>
+
+    <!-- ===== BALL TRAIL ===== -->
+    <ellipse cx="490" cy="510" rx="10" ry="10" fill="rgba(0,245,255,0.08)"/>
+    <ellipse cx="505" cy="535" rx="12" ry="12" fill="rgba(0,245,255,0.12)"/>
+    <ellipse cx="524" cy="562" rx="14" ry="14" fill="rgba(0,245,255,0.18)"/>
+    <ellipse cx="544" cy="592" rx="16" ry="16" fill="rgba(0,245,255,0.24)"/>
+    <ellipse cx="558" cy="620" rx="18" ry="18" fill="rgba(0,245,255,0.3)"/>
+
+    <!-- ===== BALL ===== -->
+    <!-- Outer glow ring -->
+    <circle cx="568" cy="650" r="66" fill="rgba(0,245,255,0.12)" filter="url(#ballGlow)"/>
+    <circle cx="568" cy="650" r="44" fill="rgba(0,245,255,0.2)" filter="url(#ballGlow)"/>
+    <!-- Ball body -->
+    <circle cx="568" cy="650" r="36" fill="url(#ballGrad)" filter="url(#cyanGlow)"/>
+    <!-- Ball specular -->
+    <ellipse cx="554" cy="636" rx="14" ry="10" fill="rgba(255,255,255,0.55)"/>
+
+    <!-- ===== PADDLE ===== -->
+    <!-- Paddle glow -->
+    <rect x="200" y="870" width="380" height="48" rx="24" fill="rgba(0,245,255,0.15)" filter="url(#ballGlow)"/>
+    <!-- Paddle body -->
+    <rect x="212" y="876" width="360" height="38" rx="19" fill="url(#paddleGrad)" filter="url(#cyanGlow)"/>
+    <!-- Paddle top shine -->
+    <rect x="224" y="879" width="336" height="15" rx="12" fill="rgba(255,255,255,0.38)"/>
+    <!-- Paddle inner light band -->
+    <rect x="240" y="888" width="304" height="3" rx="2" fill="rgba(255,255,255,0.5)"/>
+
+    <!-- ===== PARTICLE EXPLOSION (from shattered brick area) ===== -->
+    <!-- Particles scattering from ~432,184 area -->
+    <g filter="url(#redGlow)">
+      <circle cx="475" cy="130" r="5" fill="#ff3380" opacity="0.9"/>
+      <circle cx="510" cy="115" r="4" fill="#ff3380" opacity="0.7"/>
+      <circle cx="540" cy="125" r="6" fill="#ff6600" opacity="0.8"/>
+      <circle cx="570" cy="108" r="4" fill="#ff3380" opacity="0.6"/>
+      <circle cx="498" cy="100" r="3" fill="#ff3380" opacity="0.7"/>
+      <circle cx="462" cy="108" r="4" fill="#ff6600" opacity="0.65"/>
+      <circle cx="530" cy="95" r="3" fill="#ffffff" opacity="0.5"/>
+      <!-- Bigger shards -->
+      <polygon points="460,220 472,200 485,215" fill="#ff3380" opacity="0.7"/>
+      <polygon points="550,218 562,195 576,210" fill="#ff3380" opacity="0.6"/>
+      <polygon points="504,228 518,208 530,222" fill="#ff6600" opacity="0.65"/>
+      <!-- Score flash -->
+      <rect x="574" y="110" width="88" height="34" rx="8" fill="rgba(255,51,128,0.15)" stroke="rgba(255,51,128,0.5)" stroke-width="1.5"/>
+      <text x="618" y="133" text-anchor="middle" font-family="'Courier New', monospace" font-weight="700" font-size="22" fill="#ff3380" opacity="0.9">+50</text>
+    </g>
+
+    <!-- ===== SCANLINES ===== -->
+    <rect width="1024" height="1024" fill="url(#scanlines)"/>
+
+    <!-- ===== BORDER GLOW ===== -->
+    <rect x="4" y="4" width="1016" height="1016" rx="198" ry="198" fill="none" stroke="rgba(0,245,255,0.15)" stroke-width="3"/>
+    <rect x="12" y="12" width="1000" height="1000" rx="192" ry="192" fill="none" stroke="rgba(0,245,255,0.06)" stroke-width="2"/>
+
+    <!-- ===== TITLE TEXT ===== -->
+    <text x="512" y="800" text-anchor="middle" font-family="'Courier New', Courier, monospace" font-weight="900" font-size="76" letter-spacing="12" fill="#00f5ff" opacity="0.95" filter="url(#cyanGlow)">BRICK</text>
+    <text x="512" y="866" text-anchor="middle" font-family="'Courier New', Courier, monospace" font-weight="900" font-size="76" letter-spacing="8" fill="#00f5ff" opacity="0.95" filter="url(#cyanGlow)">BREAKER</text>
+
+  </g>
+</svg>
