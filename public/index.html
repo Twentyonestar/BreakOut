@@ -593,9 +593,10 @@
 
     window.fbSubscribe(rows => {
       window._fbBoard = rows;
+
       if (window.lbRenderFb) {
-        window.lbRenderFb("lb-start-wrap", null, null);
-        window.lbRenderFb("lb-go-wrap", null, null);
+        window.lbRenderFb('lb-start-wrap', null, null);
+        window.lbRenderFb('lb-go-wrap', null, null);
       }
     });
   </script>
@@ -725,7 +726,9 @@
       const wrap = document.getElementById(wrapId);
       if (!wrap) return;
 
-      const board = (window._fbBoard && window._fbBoard.length > 0 ? window._fbBoard : lbLoad()).slice(0, 3);
+      const board = (window._fbBoard && window._fbBoard.length > 0
+        ? window._fbBoard
+        : lbLoad()).slice(0, 10);
 
       const RANKS = [
         { label: "1ST", cls: "gold" },
