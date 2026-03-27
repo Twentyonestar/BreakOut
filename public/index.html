@@ -557,7 +557,7 @@
 
     window.fbLoad = async function () {
       try {
-        const q = query(ref(db, SCORES_REF), orderByChild("score"), limitToLast(10));
+        const q = query(ref(db, SCORES_REF), orderByChild("score"), limitToLast(5));
         const snap = await get(q);
 
         const rows = [];
@@ -584,7 +584,7 @@
     };
 
     window.fbSubscribe = function (callback) {
-      const q = query(ref(db, SCORES_REF), orderByChild("score"), limitToLast(10));
+      const q = query(ref(db, SCORES_REF), orderByChild("score"), limitToLast(5));
 
       return onValue(q, snap => {
         const rows = [];
@@ -729,7 +729,7 @@
         ts: Date.now()
       });
       board.sort((a, b) => (b.score - a.score) || ((b.ts || 0) - (a.ts || 0)));
-      board = board.slice(0, 10);
+      board = board.slice(0, 5);
       try { localStorage.setItem(LS_KEY, JSON.stringify(board)); } catch (e) { }
       return board;
     }
@@ -749,7 +749,7 @@
 
       const board = (window._fbBoard && window._fbBoard.length > 0
         ? window._fbBoard
-        : lbLoad()).slice(0, 10);
+        : lbLoad()).slice(0, 5);
 
       const RANKS = [
         { label: "1ST", cls: "gold" },
