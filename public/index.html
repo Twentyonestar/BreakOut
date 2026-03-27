@@ -1261,6 +1261,7 @@
     }
 
     function startGame() {
+      if (gameState !== "idle") return;
       const raw = document.getElementById("name-input").value;
       const clean = sanitizeName(raw);
 
@@ -1315,6 +1316,8 @@
 
     function quitGame() {
       if (gameState !== "playing") return;
+
+      if (document.activeElement) document.activeElement.blur();
 
       const ok = confirm("게임을 그만두시겠습니까?\n현재 점수가 랭킹에 저장됩니다.");
       if (!ok) return;
