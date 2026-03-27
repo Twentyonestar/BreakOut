@@ -113,11 +113,6 @@
       text-shadow: 0 0 10px var(--glow1);
     }
 
-    #level-display {
-      color: var(--accent3) !important;
-      text-shadow: 0 0 10px rgba(173, 255, 47, 0.4);
-    }
-
     #player-display {
       color: var(--accent1) !important;
       text-shadow: 0 0 10px var(--glow1);
@@ -214,7 +209,7 @@
       font-family: 'Orbitron', sans-serif;
       font-size: 0.85rem;
       color: var(--accent1);
-      letter-spacing: 0.15em;
+      letter-spacing: 0.08em;
       margin-bottom: 2px;
     }
 
@@ -256,7 +251,7 @@
       font-family: 'Orbitron', sans-serif;
       font-size: 1rem;
       font-weight: 700;
-      letter-spacing: 0.08em;
+      letter-spacing: 0.04em;
       text-align: center;
       padding: 9px 18px;
       width: 230px;
@@ -268,7 +263,7 @@
     .name-input::placeholder {
       color: var(--dim);
       font-size: 0.72rem;
-      letter-spacing: 0.1em;
+      letter-spacing: 0.04em;
     }
 
     .name-input:focus {
@@ -418,9 +413,9 @@
       font-weight: 700;
       color: var(--accent1);
       text-shadow: 0 0 8px var(--glow1);
-      min-width: 58px;
+      min-width: 78px;
       text-align: right;
-      letter-spacing: 0.05em;
+      letter-spacing: 0.02em;
     }
 
     .controls {
@@ -543,12 +538,7 @@
     window.fbSave = async function (name, score) {
       try {
         const cleanName = sanitizeName(name);
-        if (!cleanName) {
-          throw new Error("이름이 비어 있습니다.");
-        }
-
-        console.log("저장 시도 projectId:", firebaseConfig.projectId);
-        console.log("저장 시도 databaseURL:", firebaseConfig.databaseURL);
+        if (!cleanName) throw new Error("이름이 비어 있습니다.");
 
         const result = await push(ref(db, SCORES_REF), {
           name: cleanName,
@@ -571,7 +561,7 @@
         const snap = await get(q);
         const rows = [];
         snap.forEach(child => rows.push(child.val()));
-        rows.sort((a, b) => b.score - a.score || b.ts - a.ts);
+        rows.sort((a, b) => (b.score - a.score) || ((b.ts || 0) - (a.ts || 0)));
         return rows;
       } catch (e) {
         console.warn("fbLoad error", e);
@@ -584,7 +574,7 @@
       onValue(q, snap => {
         const rows = [];
         snap.forEach(child => rows.push(child.val()));
-        rows.sort((a, b) => b.score - a.score || b.ts - a.ts);
+        rows.sort((a, b) => (b.score - a.score) || ((b.ts || 0) - (a.ts || 0)));
         callback(rows);
       });
     };
@@ -593,10 +583,9 @@
 
     window.fbSubscribe(rows => {
       window._fbBoard = rows;
-
       if (window.lbRenderFb) {
-        window.lbRenderFb('lb-start-wrap', null, null);
-        window.lbRenderFb('lb-go-wrap', null, null);
+        window.lbRenderFb("lb-start-wrap", null, null);
+        window.lbRenderFb("lb-go-wrap", null, null);
       }
     });
   </script>
@@ -680,7 +669,8 @@
     const W = canvas.width, H = canvas.height;
 
     let gameState = "idle";
-    let score = 0, lives = 1;
+    let score = 0;
+    let lives = 1;
     let nextBallCount = 1;
     let aimAngle = -Math.PI * 0.75;
     let isAiming = true;
@@ -691,8 +681,11 @@
     const LS_KEY = "brkbrkboard_v1";
 
     function lbLoad() {
-      try { return JSON.parse(localStorage.getItem(LS_KEY)) || []; }
-      catch { return []; }
+      try {
+        return JSON.parse(localStorage.getItem(LS_KEY)) || [];
+      } catch {
+        return [];
+      }
     }
 
     function sanitizeName(name) {
@@ -707,7 +700,7 @@
         score: Number(sc) || 0,
         ts: Date.now()
       });
-      board.sort((a, b) => b.score - a.score || b.ts - a.ts);
+      board.sort((a, b) => (b.score - a.score) || ((b.ts || 0) - (a.ts || 0)));
       board = board.slice(0, 10);
       try { localStorage.setItem(LS_KEY, JSON.stringify(board)); } catch (e) { }
       return board;
@@ -747,15 +740,15 @@
         html += `<div class="lb-empty">아직 기록이 없습니다</div>`;
       } else {
         board.forEach((e, i) => {
-          const rankMeta = RANKS[i] || { label: `${i + 1}TH`, cls: "" };
-          const isNew = highlightName && e.name === highlightName && e.score === highlightScore;
+          const rankMeta = RANKS[i] || { label: `${i + 1}`, cls: "" };
+          const isNew = !!(highlightName && e.name === highlightName && e.score === highlightScore);
 
           html += `
-    <div class="lb-row${isNew ? " is-new" : ""}">
-      <span class="lb-rank ${rankMeta.cls}">${rankMeta.label}</span>
-      <span class="lb-name">${esc(e.name)}</span>
-      <span class="lb-score">${String(e.score).padStart(5, "0")}</span>
-    </div>`;
+        <div class="lb-row${isNew ? " is-new" : ""}">
+          <span class="lb-rank ${rankMeta.cls}">${rankMeta.label}</span>
+          <span class="lb-name">${esc(e.name)}</span>
+          <span class="lb-score">${String(e.score).padStart(7, "0")}</span>
+        </div>`;
         });
       }
 
@@ -780,8 +773,11 @@
     }
 
     let bricks = [];
-    const BRICK_COLS = 7, BRICK_PAD = 4, BRICK_TOP = 50;
-    const BRICK_H = 22, BRICK_MOVE = BRICK_H + BRICK_PAD;
+    const BRICK_COLS = 7;
+    const BRICK_PAD = 4;
+    const BRICK_TOP = 50;
+    const BRICK_H = 22;
+    const BRICK_MOVE = BRICK_H + BRICK_PAD;
 
     function addBrickRow() {
       bricks.forEach(b => { b.y += BRICK_MOVE; });
@@ -806,9 +802,12 @@
         bricks.push({
           x: BRICK_PAD + c * (bw + BRICK_PAD),
           y: BRICK_TOP,
-          w: bw, h: BRICK_H,
+          w: bw,
+          h: BRICK_H,
           color: brickColor,
-          hp, maxHp: hp, alive: true
+          hp,
+          maxHp: hp,
+          alive: true
         });
       });
     }
@@ -818,7 +817,8 @@
       for (let i = 0; i < 2; i++) addBrickRow();
     }
 
-    let particles = [], flashes = [];
+    let particles = [];
+    let flashes = [];
 
     function spawnParticles(x, y, color, n = 8) {
       for (let i = 0; i < n; i++) {
@@ -841,7 +841,8 @@
     }
 
     const keys = {};
-    let mouseX = null, mouseY = null;
+    let mouseX = null;
+    let mouseY = null;
 
     document.addEventListener("keydown", e => {
       keys[e.code] = true;
@@ -856,7 +857,9 @@
         quitGame();
       }
 
-      if (["ArrowLeft", "ArrowRight"].includes(e.code)) e.preventDefault();
+      if (["ArrowLeft", "ArrowRight"].includes(e.code)) {
+        e.preventDefault();
+      }
     });
 
     document.addEventListener("keyup", e => {
@@ -994,18 +997,21 @@
       ctx.save();
       ctx.strokeStyle = "rgba(26,42,108,0.3)";
       ctx.lineWidth = 0.5;
+
       for (let x = 0; x < W; x += 26) {
         ctx.beginPath();
         ctx.moveTo(x, 0);
         ctx.lineTo(x, H);
         ctx.stroke();
       }
+
       for (let y = 0; y < H; y += 26) {
         ctx.beginPath();
         ctx.moveTo(0, y);
         ctx.lineTo(W, y);
         ctx.stroke();
       }
+
       ctx.restore();
     }
 
@@ -1184,7 +1190,6 @@
 
     async function saveCurrentScore() {
       const cleanName = sanitizeName(currentPlayer);
-
       if (!cleanName) throw new Error("플레이어 이름이 없습니다.");
 
       if (window.fbSave) {
@@ -1214,7 +1219,7 @@
         const savedName = await saveCurrentScore();
 
         document.getElementById("fs-name").textContent = savedName;
-        document.getElementById("fs-score").textContent = String(score).padStart(5, "0");
+        document.getElementById("fs-score").textContent = String(score).padStart(7, "0");
 
         if (mode === "quit") {
           document.getElementById("gameover-title").textContent = "GAME ENDED";
@@ -1229,7 +1234,7 @@
       } catch (e) {
         console.error("점수 저장/종료 처리 실패:", e);
         document.getElementById("fs-name").textContent = currentPlayer;
-        document.getElementById("fs-score").textContent = String(score).padStart(5, "0");
+        document.getElementById("fs-score").textContent = String(score).padStart(7, "0");
         document.getElementById("fs-detail").textContent = "SCORE SAVE FAILED";
         lbRender("lb-go-wrap", null, null);
       }
