@@ -560,15 +560,11 @@
         const snap = await get(ref(db, SCORES_REF));
         const rows = [];
         snap.forEach(child => rows.push(child.val()));
-        const unique = {};
-        rows.forEach(r => {
-          if (!unique[r.name] || unique[r.name].score < r.score) {
-            unique[r.name] = r;
-          }
-        });
-        const finalRows = Object.values(unique);
-        finalRows.sort((a, b) => (b.score - a.score) || ((b.ts || 0) - (a.ts || 0)));
-        return finalRows.slice(0, 10);
+
+        // 🔥 중복 제거 없이 그대로 사용
+        rows.sort((a, b) => (b.score - a.score) || ((b.ts || 0) - (a.ts || 0)));
+
+        return rows.slice(0, 10);
       } catch (e) {
         console.warn("fbLoad error", e);
         return [];
