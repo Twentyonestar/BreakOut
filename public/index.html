@@ -747,13 +747,15 @@
         html += `<div class="lb-empty">아직 기록이 없습니다</div>`;
       } else {
         board.forEach((e, i) => {
+          const rankMeta = RANKS[i] || { label: `${i + 1}TH`, cls: "" };
           const isNew = highlightName && e.name === highlightName && e.score === highlightScore;
+
           html += `
-        <div class="lb-row${isNew ? " is-new" : ""}">
-          <span class="lb-rank ${RANKS[i].cls}">${RANKS[i].label}</span>
-          <span class="lb-name">${esc(e.name)}</span>
-          <span class="lb-score">${String(e.score).padStart(5, "0")}</span>
-        </div>`;
+    <div class="lb-row${isNew ? " is-new" : ""}">
+      <span class="lb-rank ${rankMeta.cls}">${rankMeta.label}</span>
+      <span class="lb-name">${esc(e.name)}</span>
+      <span class="lb-score">${String(e.score).padStart(5, "0")}</span>
+    </div>`;
         });
       }
 
