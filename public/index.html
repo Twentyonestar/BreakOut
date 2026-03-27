@@ -528,17 +528,17 @@
   <!-- Firebase -->
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-    import { getDatabase, ref, set, push, query, orderByChild, limitToLast, get, onValue }
+    import { getDatabase, ref, push, query, orderByChild, limitToLast, get, onValue }
       from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
 
     const firebaseConfig = {
-      apiKey: "AIzaSyD1bb4vMa4FMMdkArBCmDk0BLCDz9QIjy4",
-      authDomain: "breakout-game-4ad28.firebaseapp.com",
+      apiKey: "AIzaSyA09Mrym2a5a2yrZT3ceAtP17j6W35LQV4",
+      authDomain: "moxn-472be.firebaseapp.com",
       databaseURL: "https://moxn-472be-default-rtdb.firebaseio.com",
-      projectId: "breakout-game-4ad28",
-      storageBucket: "breakout-game-4ad28.firebasestorage.app",
-      messagingSenderId: "358815160809",
-      appId: "1:358815160809:web:5c33f4f8a095d25ae15378"
+      projectId: "moxn-472be",
+      storageBucket: "moxn-472be.firebasestorage.app",
+      messagingSenderId: "963494233910",
+      appId: "1:963494233910:web:44990b6dab3975a9c01597"
     };
 
     const app = initializeApp(firebaseConfig);
@@ -548,55 +548,51 @@
     // 점수 저장
     window.fbSave = async function (name, score) {
       try {
-        const safeName = name.slice(0, 10).toUpperCase().replace(/[.#$\[\]/]/g, "_");
-        const userRef = ref(db, SCORES_REF + '/' + safeName);
-        const snap = await get(userRef);
-        if (!snap.exists() || snap.val().score < score) {
-          await set(userRef, {
-            name: safeName,
-            score,
-            ts: Date.now()
-          });
-        }
-      } catch (e) { console.warn('fbSave error', e); }
+        console.log("저장 시도 projectId:", firebaseConfig.projectId);
+        console.log("저장 시도 databaseURL:", firebaseConfig.databaseURL);
+
+        const result = await push(ref(db, SCORES_REF), {
+          name: name.slice(0, 10).toUpperCase(),
+          score,
+          ts: Date.now()
+        });
+
+        console.log("저장 성공 key:", result.key);
+        return result.key;
+      } catch (e) {
+        console.error("fbSave error:", e);
+        alert("Firebase 저장 실패: " + (e?.message || e));
+        throw e;
+      }
     };
 
     // TOP 10 불러오기
     window.fbLoad = async function () {
       try {
-        const q = query(ref(db, SCORES_REF), orderByChild('score'), limitToLast(30));
+        const q = query(ref(db, SCORES_REF), orderByChild('score'), limitToLast(10));
         const snap = await get(q);
         const rows = [];
         snap.forEach(child => rows.push(child.val()));
-        const unique = {};
-        rows.reverse().forEach(r => {
-          if (!unique[r.name]) unique[r.name] = r;
-        });
-        return Object.values(unique).sort((a, b) => b.score - a.score);
+        rows.sort((a, b) => b.score - a.score);
+        return rows;
       } catch (e) { console.warn('fbLoad error', e); return []; }
     };
 
     // 실시간 랭킹 구독
     window.fbSubscribe = function (callback) {
-      const q = query(ref(db, SCORES_REF), orderByChild('score'), limitToLast(30));
+      const q = query(ref(db, SCORES_REF), orderByChild('score'), limitToLast(10));
       onValue(q, snap => {
         const rows = [];
         snap.forEach(child => rows.push(child.val()));
-        const unique = {};
-        rows.reverse().forEach(r => {
-          if (!unique[r.name]) unique[r.name] = r;
-        });
-        callback(Object.values(unique).sort((a, b) => b.score - a.score));
+        rows.sort((a, b) => b.score - a.score);
+        callback(rows);
       });
     };
 
     // 초기 랭킹 로드
     window.fbSubscribe(rows => {
       window._fbBoard = rows;
-      if (window.lbRenderFb) {
-        window.lbRenderFb('lb-start-wrap', null, null);
-        window.lbRenderFb('lb-go-wrap', null, null);
-      }
+      if (window.lbRenderFb) window.lbRenderFb('lb-start-wrap', null, null);
     });
   </script>
 </head>
@@ -714,18 +710,12 @@
         catch { return []; }
       }
 
-      async function lbSave(name, sc) {
+      function lbSave(name, sc) {
         // Firebase에 저장
-        if (window.fbSave) await window.fbSave(name, sc);
+        if (window.fbSave) window.fbSave(name, sc);
         // 로컬에도 백업
         let board = lbLoad();
-        const safeName = name.slice(0, 10).toUpperCase();
-        const existing = board.find(x => x.name === safeName);
-        if (existing) {
-          if (sc > existing.score) existing.score = sc;
-        } else {
-          board.push({ name: safeName, score: sc });
-        }
+        board.push({ name: name.slice(0, 10).toUpperCase(), score: sc });
         board.sort((a, b) => b.score - a.score);
         board = board.slice(0, 10);
         try { localStorage.setItem(LS_KEY, JSON.stringify(board)); } catch (e) { }
@@ -740,25 +730,10 @@
       function lbRender(wrapId, highlightName, highlightScore) {
         const wrap = document.getElementById(wrapId);
         if (!wrap) return;
-
-        // Firebase 데이터와 로컬 데이터를 병합하여 점수가 높은 것을 우선으로 표시
-        let merged = lbLoad();
-        if (window._fbBoard && Array.isArray(window._fbBoard)) {
-          merged = [...merged, ...window._fbBoard];
-        }
-        
-        const unique = {};
-        merged.forEach(r => {
-          if (!r || !r.name) return;
-          const nm = r.name;
-          if (!unique[nm] || unique[nm].score < r.score) {
-            unique[nm] = r;
-          }
-        });
-        
-        const board = Object.values(unique)
-          .sort((a, b) => b.score - a.score)
-          .slice(0, 3);
+        // Firebase 데이터 우선, 없으면 로컬
+        const board = (window._fbBoard && window._fbBoard.length > 0
+          ? window._fbBoard
+          : lbLoad()).slice(0, 3);
 
         const RANKS = [
           { label: '1ST', cls: 'gold' },
@@ -985,25 +960,43 @@
         // 이 모드는 무한 진행 - 벽돌 다 깨도 계속 (addBrickRow로 계속 추가됨)
       }
 
-      function doGameOver() {
+      async function doGameOver() {
         gameState = 'gameover';
+
+        try {
+          if (window.fbSave) {
+            await window.fbSave(currentPlayer, score);
+          }
+        } catch (e) {
+          console.error("게임오버 저장 실패:", e);
+        }
+
+        // 로컬 백업
+        let board = lbLoad();
+        board.push({ name: currentPlayer.slice(0, 10).toUpperCase(), score });
+        board.sort((a, b) => b.score - a.score);
+        board = board.slice(0, 10);
+        try { localStorage.setItem(LS_KEY, JSON.stringify(board)); } catch (e) { }
 
         document.getElementById('fs-name').textContent = currentPlayer;
         document.getElementById('fs-score').textContent = String(score).padStart(5, '0');
         document.getElementById('fs-detail').textContent = `BALLS ${nextBallCount}  ·  GAME OVER`;
 
-        document.getElementById('ov-gameover').style.display = 'flex';
-
-        // 비동기로 저장 완료 후 랭킹 업데이트
-        (async () => {
-          await lbSave(currentPlayer, score);
-          if (window.fbLoad) {
-            window._fbBoard = await window.fbLoad();
+        if (window.fbLoad) {
+          try {
+            const rows = await window.fbLoad();
+            window._fbBoard = rows;
             lbRender('lb-go-wrap', currentPlayer, score);
-          } else {
+            lbRender('lb-start-wrap', currentPlayer, score);
+          } catch (e) {
+            console.error("fbLoad error:", e);
             lbRender('lb-go-wrap', currentPlayer, score);
           }
-        })();
+        } else {
+          lbRender('lb-go-wrap', currentPlayer, score);
+        }
+
+        document.getElementById('ov-gameover').style.display = 'flex';
       }
 
       // ─── Draw ──────────────────────────────────────────
