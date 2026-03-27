@@ -557,12 +557,18 @@
 
     window.fbLoad = async function () {
       try {
-        const q = query(ref(db, SCORES_REF), orderByChild("score"), limitToLast(10));
-        const snap = await get(q);
+        const snap = await get(ref(db, SCORES_REF));
         const rows = [];
         snap.forEach(child => rows.push(child.val()));
-        rows.sort((a, b) => (b.score - a.score) || ((b.ts || 0) - (a.ts || 0)));
-        return rows;
+        const unique = {};
+        rows.forEach(r => {
+          if (!unique[r.name] || unique[r.name].score < r.score) {
+            unique[r.name] = r;
+          }
+        });
+        const finalRows = Object.values(unique);
+        finalRows.sort((a, b) => (b.score - a.score) || ((b.ts || 0) - (a.ts || 0)));
+        return finalRows.slice(0, 10);
       } catch (e) {
         console.warn("fbLoad error", e);
         return [];
@@ -570,12 +576,18 @@
     };
 
     window.fbSubscribe = function (callback) {
-      const q = query(ref(db, SCORES_REF), orderByChild("score"), limitToLast(10));
-      onValue(q, snap => {
+      onValue(ref(db, SCORES_REF), snap => {
         const rows = [];
         snap.forEach(child => rows.push(child.val()));
-        rows.sort((a, b) => (b.score - a.score) || ((b.ts || 0) - (a.ts || 0)));
-        callback(rows);
+        const unique = {};
+        rows.forEach(r => {
+          if (!unique[r.name] || unique[r.name].score < r.score) {
+            unique[r.name] = r;
+          }
+        });
+        const finalRows = Object.values(unique);
+        finalRows.sort((a, b) => (b.score - a.score) || ((b.ts || 0) - (a.ts || 0)));
+        callback(finalRows.slice(0, 10));
       });
     };
 
