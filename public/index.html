@@ -557,12 +557,26 @@
 
     window.fbLoad = async function () {
       try {
-        const snap = await get(ref(db, SCORES_REF));
-        const rows = [];
-        snap.forEach(child => rows.push(child.val()));
+        const q = query(ref(db, SCORES_REF), orderByChild("score"), limitToLast(10));
+        const snap = await get(q);
 
-        rows.sort((a, b) => (b.score - a.score) || ((b.ts || 0) - (a.ts || 0)));
-        return rows.slice(0, 10);
+        const rows = [];
+        snap.forEach(child => {
+          const v = child.val() || {};
+          rows.push({
+            name: sanitizeName(v.name || "UNKNOWN"),
+            score: Number(v.score) || 0,
+            ts: Number(v.ts) || 0
+          });
+        });
+
+        rows.sort((a, b) => {
+          if (b.score !== a.score) return b.score - a.score;
+          return (b.ts || 0) - (a.ts || 0);
+        });
+
+        console.log("fbLoad sorted rows:", rows);
+        return rows;
       } catch (e) {
         console.warn("fbLoad error", e);
         return [];
@@ -570,14 +584,25 @@
     };
 
     window.fbSubscribe = function (callback) {
-      return onValue(ref(db, SCORES_REF), snap => {
-        console.log("🔥 Firebase raw:", snap.val());
+      const q = query(ref(db, SCORES_REF), orderByChild("score"), limitToLast(10));
 
-        const data = snap.val() || {};
-        const rows = Object.values(data);
+      return onValue(q, snap => {
+        const rows = [];
+        snap.forEach(child => {
+          const v = child.val() || {};
+          rows.push({
+            name: sanitizeName(v.name || "UNKNOWN"),
+            score: Number(v.score) || 0,
+            ts: Number(v.ts) || 0
+          });
+        });
 
-        console.log("🔥 rows length:", rows.length);
+        rows.sort((a, b) => {
+          if (b.score !== a.score) return b.score - a.score;
+          return (b.ts || 0) - (a.ts || 0);
+        });
 
+        console.log("fbSubscribe sorted rows:", rows);
         callback(rows);
       });
     };
