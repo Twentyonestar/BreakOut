@@ -14,6 +14,7 @@
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Break Out!</title>
+
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Share+Tech+Mono&display=swap');
 
@@ -80,10 +81,13 @@
 
     .hud {
       display: flex;
-      gap: 36px;
+      gap: 24px;
       margin-bottom: 12px;
       font-size: 0.85rem;
       letter-spacing: 0.15em;
+      align-items: end;
+      flex-wrap: wrap;
+      justify-content: center;
     }
 
     .hud-item label {
@@ -117,11 +121,31 @@
     #player-display {
       color: var(--accent1) !important;
       text-shadow: 0 0 10px var(--glow1);
-      max-width: 100px;
+      max-width: 120px;
       overflow: hidden;
       text-overflow: ellipsis;
       white-space: nowrap;
       display: inline-block;
+    }
+
+    .hud-quit-btn {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 0.65rem;
+      font-weight: 700;
+      letter-spacing: 0.18em;
+      padding: 8px 14px;
+      border: 1px solid rgba(255, 0, 110, 0.7);
+      background: transparent;
+      color: var(--accent2);
+      cursor: pointer;
+      text-transform: uppercase;
+      box-shadow: 0 0 10px rgba(255, 0, 110, 0.16);
+      transition: all 0.2s;
+    }
+
+    .hud-quit-btn:hover {
+      background: rgba(255, 0, 110, 0.08);
+      box-shadow: 0 0 18px rgba(255, 0, 110, 0.28);
     }
 
     .canvas-wrapper {
@@ -135,7 +159,6 @@
       background: var(--panel);
     }
 
-    /* ─── Overlays ─── */
     .overlay {
       position: absolute;
       inset: 0;
@@ -211,7 +234,6 @@
       margin-top: 2px;
     }
 
-    /* ─── Name input ─── */
     .name-section {
       display: flex;
       flex-direction: column;
@@ -234,13 +256,12 @@
       font-family: 'Orbitron', sans-serif;
       font-size: 1rem;
       font-weight: 700;
-      letter-spacing: 0.2em;
+      letter-spacing: 0.08em;
       text-align: center;
       padding: 9px 18px;
-      width: 210px;
+      width: 230px;
       outline: none;
       box-shadow: 0 0 12px var(--glow1), inset 0 0 12px rgba(0, 245, 255, 0.04);
-      text-transform: uppercase;
       caret-color: var(--accent1);
     }
 
@@ -254,7 +275,6 @@
       box-shadow: 0 0 22px var(--glow1), inset 0 0 18px rgba(0, 245, 255, 0.08);
     }
 
-    /* ─── Buttons ─── */
     .btn {
       font-family: 'Orbitron', sans-serif;
       font-size: 0.78rem;
@@ -293,7 +313,6 @@
       margin-top: 6px;
     }
 
-    /* ─── Leaderboard ─── */
     .lb-wrap {
       width: 100%;
       margin-bottom: 14px;
@@ -386,20 +405,11 @@
     .lb-name {
       flex: 1;
       font-size: 0.8rem;
-      letter-spacing: 0.08em;
+      letter-spacing: 0.04em;
       color: var(--text);
-      text-transform: uppercase;
       overflow: hidden;
       text-overflow: ellipsis;
       white-space: nowrap;
-    }
-
-    .lb-lv {
-      font-size: 0.62rem;
-      color: var(--dim);
-      min-width: 30px;
-      text-align: right;
-      letter-spacing: 0.05em;
     }
 
     .lb-score {
@@ -413,7 +423,6 @@
       letter-spacing: 0.05em;
     }
 
-    /* ─── Controls ─── */
     .controls {
       margin-top: 12px;
       font-size: 0.68rem;
@@ -431,7 +440,6 @@
       color: var(--text);
     }
 
-    /* ─── Mobile Touch UI ─── */
     .touch-controls {
       display: none;
       position: fixed;
@@ -462,32 +470,6 @@
     .touch-zone:active,
     .touch-zone.active {
       opacity: 0.85;
-    }
-
-    .touch-arrow {
-      width: 52px;
-      height: 52px;
-      border: 2px solid var(--accent1);
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 1.4rem;
-      color: var(--accent1);
-      box-shadow: 0 0 16px var(--glow1);
-    }
-
-    .touch-fire {
-      width: 64px;
-      height: 64px;
-      border: 2px solid var(--accent3);
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 1.5rem;
-      color: var(--accent3);
-      box-shadow: 0 0 16px rgba(173, 255, 47, 0.4);
     }
 
     @media (pointer: coarse) {
@@ -525,11 +507,19 @@
       }
     }
   </style>
-  <!-- Firebase -->
+
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-    import { getDatabase, ref, push, query, orderByChild, limitToLast, get, onValue }
-      from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+    import {
+      getDatabase,
+      ref,
+      push,
+      query,
+      orderByChild,
+      limitToLast,
+      get,
+      onValue
+    } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
 
     const firebaseConfig = {
       apiKey: "AIzaSyA09Mrym2a5a2yrZT3ceAtP17j6W35LQV4",
@@ -543,17 +533,26 @@
 
     const app = initializeApp(firebaseConfig);
     const db = getDatabase(app);
-    const SCORES_REF = 'scores';
+    const SCORES_REF = "scores";
 
-    // 점수 저장
+    function sanitizeName(name) {
+      const trimmed = (name || "").trim().replace(/\s+/g, " ");
+      return Array.from(trimmed).slice(0, 10).join("");
+    }
+
     window.fbSave = async function (name, score) {
       try {
+        const cleanName = sanitizeName(name);
+        if (!cleanName) {
+          throw new Error("이름이 비어 있습니다.");
+        }
+
         console.log("저장 시도 projectId:", firebaseConfig.projectId);
         console.log("저장 시도 databaseURL:", firebaseConfig.databaseURL);
 
         const result = await push(ref(db, SCORES_REF), {
-          name: name.slice(0, 10).toUpperCase(),
-          score,
+          name: cleanName,
+          score: Number(score) || 0,
           ts: Date.now()
         });
 
@@ -566,39 +565,43 @@
       }
     };
 
-    // TOP 10 불러오기
     window.fbLoad = async function () {
       try {
-        const q = query(ref(db, SCORES_REF), orderByChild('score'), limitToLast(10));
+        const q = query(ref(db, SCORES_REF), orderByChild("score"), limitToLast(10));
         const snap = await get(q);
         const rows = [];
         snap.forEach(child => rows.push(child.val()));
-        rows.sort((a, b) => b.score - a.score);
+        rows.sort((a, b) => b.score - a.score || b.ts - a.ts);
         return rows;
-      } catch (e) { console.warn('fbLoad error', e); return []; }
+      } catch (e) {
+        console.warn("fbLoad error", e);
+        return [];
+      }
     };
 
-    // 실시간 랭킹 구독
     window.fbSubscribe = function (callback) {
-      const q = query(ref(db, SCORES_REF), orderByChild('score'), limitToLast(10));
+      const q = query(ref(db, SCORES_REF), orderByChild("score"), limitToLast(10));
       onValue(q, snap => {
         const rows = [];
         snap.forEach(child => rows.push(child.val()));
-        rows.sort((a, b) => b.score - a.score);
+        rows.sort((a, b) => b.score - a.score || b.ts - a.ts);
         callback(rows);
       });
     };
 
-    // 초기 랭킹 로드
+    window.fbSanitizeName = sanitizeName;
+
     window.fbSubscribe(rows => {
       window._fbBoard = rows;
-      if (window.lbRenderFb) window.lbRenderFb('lb-start-wrap', null, null);
+      if (window.lbRenderFb) {
+        window.lbRenderFb("lb-start-wrap", null, null);
+        window.lbRenderFb("lb-go-wrap", null, null);
+      }
     });
   </script>
 </head>
 
 <body>
-
   <h1>Break Out!</h1>
 
   <div class="hud">
@@ -612,34 +615,30 @@
     </div>
     <div class="hud-item">
       <label>BALLS</label>
-      <span id="lives-display">♥</span>
+      <span id="lives-display">1</span>
     </div>
+    <button class="hud-quit-btn" id="btn-quit" onclick="quitGame()" style="display:none">QUIT</button>
   </div>
 
   <div class="canvas-wrapper">
     <canvas id="game" width="520" height="520"></canvas>
 
-    <!-- START -->
     <div class="overlay start" id="ov-start">
-
       <div class="name-section" style="margin-bottom:0">
         <label>ENTER YOUR NAME</label>
-        <input class="name-input" id="name-input" type="text" maxlength="10" placeholder="PLAYER NAME"
-          autocomplete="off" spellcheck="false" />
+        <input class="name-input" id="name-input" type="text" maxlength="20" placeholder="이름 입력" autocomplete="off"
+          spellcheck="false" />
         <span id="name-warn"
           style="color:var(--accent2);font-size:0.72rem;letter-spacing:0.1em;min-height:1em;opacity:0;transition:opacity 0.2s;">이름을
           입력하세요</span>
       </div>
 
       <div class="lb-wrap" id="lb-start-wrap" style="margin-top:12px"></div>
-
       <button class="btn" id="btn-start" onclick="startGame()">START GAME</button>
-
     </div>
 
-    <!-- GAME OVER -->
     <div class="overlay gameover" id="ov-gameover" style="display:none">
-      <h2>GAME OVER</h2>
+      <h2 id="gameover-title">GAME OVER</h2>
 
       <div class="final-score-box" id="fs-box">
         <div class="fs-name" id="fs-name"></div>
@@ -655,580 +654,720 @@
       </div>
     </div>
 
-    <!-- WIN -->
     <div class="overlay win" id="ov-win" style="display:none">
       <h2>STAGE CLEAR!</h2>
       <p id="win-score-text"
         style="color:var(--text);font-family:'Orbitron',sans-serif;font-size:1rem;margin-bottom:14px"></p>
       <button class="btn" onclick="nextLevel()">NEXT LEVEL ▶</button>
     </div>
-
   </div>
 
-  <!-- Touch Controls (mobile) -->
+  <div class="controls">
+    <div><kbd>마우스</kbd> 조준 / <kbd>클릭</kbd> 발사</div>
+    <div><kbd>Enter</kbd> 시작 / <kbd>Q</kbd> 즉시 종료 저장</div>
+  </div>
+
   <div class="touch-controls" id="touch-controls">
-    <div class="touch-zone" id="touch-left">
-      <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-        <polyline points="15,5 9,12 15,19" stroke="var(--accent1)" stroke-width="2.5" stroke-linecap="round"
-          stroke-linejoin="round" />
-      </svg>
-    </div>
-    <div class="touch-zone" id="touch-fire">
-      <svg width="28" height="28" viewBox="0 0 28 28">
-        <circle cx="14" cy="14" r="10" fill="none" stroke="var(--accent3)" stroke-width="2.5" />
-        <circle cx="14" cy="14" r="5" fill="var(--accent3)" />
-      </svg>
-    </div>
-    <div class="touch-zone" id="touch-right">
-      <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-        <polyline points="9,5 15,12 9,19" stroke="var(--accent1)" stroke-width="2.5" stroke-linecap="round"
-          stroke-linejoin="round" />
-      </svg>
-    </div>
+    <div class="touch-zone" id="touch-left">◀</div>
+    <div class="touch-zone" id="touch-fire">●</div>
+    <div class="touch-zone" id="touch-right">▶</div>
+  </div>
 
+  <script>
+    const canvas = document.getElementById("game");
+    const ctx = canvas.getContext("2d");
+    const W = canvas.width, H = canvas.height;
 
+    let gameState = "idle";
+    let score = 0, lives = 1;
+    let nextBallCount = 1;
+    let aimAngle = -Math.PI * 0.75;
+    let isAiming = true;
+    let currentPlayer = "PLAYER";
+    let gameOverMode = "dead";
+    let isEndingGame = false;
 
-    <script>
-      // ─── Canvas ───────────────────────────────────────
-      const canvas = document.getElementById('game');
-      const ctx = canvas.getContext('2d');
-      const W = canvas.width, H = canvas.height;
+    const LS_KEY = "brkbrkboard_v1";
 
-      // ─── State ────────────────────────────────────────
-      let gameState = 'idle'; // idle | playing
-      let score = 0, lives = 1;
-      let nextBallCount = 1; // 다음 발사 때 공 개수
-      let aimAngle = -Math.PI * 0.75; // 현재 조준 각도 (기본: 왼쪽 위)
-      let isAiming = true; // true=각도조준중 false=발사완료
-      let currentPlayer = 'PLAYER';
+    function lbLoad() {
+      try { return JSON.parse(localStorage.getItem(LS_KEY)) || []; }
+      catch { return []; }
+    }
 
-      // ─── Leaderboard ──────────────────────────────────
-      const LS_KEY = 'brkbrkboard_v1';
+    function sanitizeName(name) {
+      if (window.fbSanitizeName) return window.fbSanitizeName(name);
+      return Array.from((name || "").trim().replace(/\s+/g, " ")).slice(0, 10).join("");
+    }
 
-      function lbLoad() {
-        try { return JSON.parse(localStorage.getItem(LS_KEY)) || []; }
-        catch { return []; }
-      }
+    function lbSaveLocal(name, sc) {
+      let board = lbLoad();
+      board.push({
+        name: sanitizeName(name),
+        score: Number(sc) || 0,
+        ts: Date.now()
+      });
+      board.sort((a, b) => b.score - a.score || b.ts - a.ts);
+      board = board.slice(0, 10);
+      try { localStorage.setItem(LS_KEY, JSON.stringify(board)); } catch (e) { }
+      return board;
+    }
 
-      function lbSave(name, sc) {
-        // Firebase에 저장
-        if (window.fbSave) window.fbSave(name, sc);
-        // 로컬에도 백업
-        let board = lbLoad();
-        board.push({ name: name.slice(0, 10).toUpperCase(), score: sc });
-        board.sort((a, b) => b.score - a.score);
-        board = board.slice(0, 10);
-        try { localStorage.setItem(LS_KEY, JSON.stringify(board)); } catch (e) { }
-        return board;
-      }
+    function esc(s) {
+      return String(s)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;");
+    }
 
-      function esc(s) {
-        return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
-      }
+    window.lbRenderFb = lbRender;
 
-      window.lbRenderFb = lbRender;
-      function lbRender(wrapId, highlightName, highlightScore) {
-        const wrap = document.getElementById(wrapId);
-        if (!wrap) return;
-        // Firebase 데이터 우선, 없으면 로컬
-        const board = (window._fbBoard && window._fbBoard.length > 0
-          ? window._fbBoard
-          : lbLoad()).slice(0, 3);
+    function lbRender(wrapId, highlightName, highlightScore) {
+      const wrap = document.getElementById(wrapId);
+      if (!wrap) return;
 
-        const RANKS = [
-          { label: '1ST', cls: 'gold' },
-          { label: '2ND', cls: 'silver' },
-          { label: '3RD', cls: 'bronze' },
-        ];
+      const board = (window._fbBoard && window._fbBoard.length > 0 ? window._fbBoard : lbLoad()).slice(0, 3);
 
-        let html = `
+      const RANKS = [
+        { label: "1ST", cls: "gold" },
+        { label: "2ND", cls: "silver" },
+        { label: "3RD", cls: "bronze" }
+      ];
+
+      let html = `
     <div class="lb-header">
       <div class="lb-header-line rev"></div>
       <div class="lb-header-title">TOP RANKING</div>
       <div class="lb-header-line"></div>
     </div>`;
 
-        if (board.length === 0) {
-          html += `<div class="lb-empty">아직 기록이 없습니다</div>`;
-        } else {
-          board.forEach((e, i) => {
-            const isNew = highlightName && e.name === highlightName && e.score === highlightScore && i === lbLoad().findIndex(x => x.name === highlightName && x.score === highlightScore);
-            html += `
-        <div class="lb-row${isNew ? ' is-new' : ''}">
+      if (board.length === 0) {
+        html += `<div class="lb-empty">아직 기록이 없습니다</div>`;
+      } else {
+        board.forEach((e, i) => {
+          const isNew = highlightName && e.name === highlightName && e.score === highlightScore;
+          html += `
+        <div class="lb-row${isNew ? " is-new" : ""}">
           <span class="lb-rank ${RANKS[i].cls}">${RANKS[i].label}</span>
           <span class="lb-name">${esc(e.name)}</span>
-          
-          <span class="lb-score">${String(e.score).padStart(5, '0')}</span>
+          <span class="lb-score">${String(e.score).padStart(5, "0")}</span>
         </div>`;
-          });
-        }
-
-        wrap.innerHTML = `<div class="lb-wrap">${html}</div>`;
-      }
-
-      // ─── Launch Point (fixed bottom-right) ───────────
-      const LAUNCH_X = W - 20;
-      const LAUNCH_Y = H - 20;
-
-      // ─── Ball ─────────────────────────────────────────
-      let balls = [];
-
-      function makeBall() {
-        return {
-          x: LAUNCH_X,
-          y: LAUNCH_Y,
-          r: 7,
-          vx: 0,
-          vy: 0,
-          attached: true,
-          trail: []
-        };
-      }
-
-      // ─── Bricks ───────────────────────────────────────
-      let bricks = [];
-      const BRICK_COLS = 7, BRICK_ROWS_BASE = 3, BRICK_PAD = 4, BRICK_TOP = 50;
-      const COLORS = [
-        { fill: '#ff006e', glow: 'rgba(255,0,110,0.6)', pts: 50 },
-        { fill: '#ff4500', glow: 'rgba(255,69,0,0.6)', pts: 40 },
-        { fill: '#ffa500', glow: 'rgba(255,165,0,0.6)', pts: 30 },
-        { fill: '#adff2f', glow: 'rgba(173,255,47,0.5)', pts: 20 },
-        { fill: '#00f5ff', glow: 'rgba(0,245,255,0.5)', pts: 10 },
-        { fill: '#a259ff', glow: 'rgba(162,89,255,0.5)', pts: 15 },
-        { fill: '#ff75c3', glow: 'rgba(255,117,195,0.5)', pts: 25 },
-      ];
-
-      const BRICK_H = 22, BRICK_MOVE = BRICK_H + BRICK_PAD; // 블록 높이 + 간격
-
-      function addBrickRow() {
-        // 기존 블록 한 줄 아래로
-        bricks.forEach(b => { b.y += BRICK_MOVE; });
-        const cols = BRICK_COLS;
-        const bw = (W - BRICK_PAD * (cols + 1)) / cols;
-        const count = 2 + Math.floor(Math.random() * (cols - 1));
-        const positions = Array.from({ length: cols }, (_, i) => i)
-          .sort(() => Math.random() - 0.5).slice(0, count);
-        // 블록 HP = 현재 공 개수와 동일
-        const hp = nextBallCount;
-        const brickColor = hp >= 5
-          ? { fill: '#ff006e', glow: 'rgba(255,0,110,0.8)', pts: hp * 50 }
-          : hp >= 3
-            ? { fill: '#ffa500', glow: 'rgba(255,165,0,0.8)', pts: hp * 40 }
-            : hp >= 2
-              ? { fill: '#adff2f', glow: 'rgba(173,255,47,0.6)', pts: hp * 30 }
-              : { fill: '#00f5ff', glow: 'rgba(0,245,255,0.5)', pts: 10 };
-        positions.forEach(c => {
-          bricks.push({
-            x: BRICK_PAD + c * (bw + BRICK_PAD),
-            y: BRICK_TOP,
-            w: bw, h: BRICK_H,
-            color: brickColor,
-            hp, maxHp: hp, alive: true
-          });
         });
       }
 
-      function buildBricks() {
-        bricks = [];
-        // 처음엔 3줄 미리 생성
-        for (let i = 0; i < 2; i++) addBrickRow();
-      }
+      wrap.innerHTML = `<div class="lb-wrap">${html}</div>`;
+    }
 
-      // ─── Particles / Flashes ──────────────────────────
-      let particles = [], flashes = [];
+    const LAUNCH_X = W - 20;
+    const LAUNCH_Y = H - 20;
 
-      function spawnParticles(x, y, color, n = 8) {
-        for (let i = 0; i < n; i++) {
-          const a = Math.random() * Math.PI * 2, sp = 1 + Math.random() * 4;
-          particles.push({ x, y, vx: Math.cos(a) * sp, vy: Math.sin(a) * sp, life: 1, decay: 0.04 + Math.random() * 0.04, r: 2 + Math.random() * 3, color });
-        }
-      }
+    let balls = [];
 
-      function addFlash(x, y, text, color) {
-        flashes.push({ x, y, text, color, life: 1, vy: -1.2 });
-      }
+    function makeBall() {
+      return {
+        x: LAUNCH_X,
+        y: LAUNCH_Y,
+        r: 7,
+        vx: 0,
+        vy: 0,
+        attached: true,
+        trail: []
+      };
+    }
 
-      // ─── Input ────────────────────────────────────────
-      const keys = {};
-      let mouseX = null, mouseY = null;
+    let bricks = [];
+    const BRICK_COLS = 7, BRICK_PAD = 4, BRICK_TOP = 50;
+    const BRICK_H = 22, BRICK_MOVE = BRICK_H + BRICK_PAD;
 
-      document.addEventListener('keydown', e => {
-        keys[e.code] = true;
-        if (e.code === 'Space') { e.preventDefault(); if (gameState === 'playing') releaseBall(); }
-        if (['ArrowLeft', 'ArrowRight'].includes(e.code)) e.preventDefault();
+    function addBrickRow() {
+      bricks.forEach(b => { b.y += BRICK_MOVE; });
+
+      const cols = BRICK_COLS;
+      const bw = (W - BRICK_PAD * (cols + 1)) / cols;
+      const count = 2 + Math.floor(Math.random() * (cols - 1));
+      const positions = Array.from({ length: cols }, (_, i) => i)
+        .sort(() => Math.random() - 0.5)
+        .slice(0, count);
+
+      const hp = nextBallCount;
+      const brickColor = hp >= 5
+        ? { fill: "#ff006e", glow: "rgba(255,0,110,0.8)", pts: hp * 50 }
+        : hp >= 3
+          ? { fill: "#ffa500", glow: "rgba(255,165,0,0.8)", pts: hp * 40 }
+          : hp >= 2
+            ? { fill: "#adff2f", glow: "rgba(173,255,47,0.6)", pts: hp * 30 }
+            : { fill: "#00f5ff", glow: "rgba(0,245,255,0.5)", pts: 10 };
+
+      positions.forEach(c => {
+        bricks.push({
+          x: BRICK_PAD + c * (bw + BRICK_PAD),
+          y: BRICK_TOP,
+          w: bw, h: BRICK_H,
+          color: brickColor,
+          hp, maxHp: hp, alive: true
+        });
       });
-      document.addEventListener('keyup', e => { keys[e.code] = false; });
-      canvas.addEventListener('mousemove', e => { const r = canvas.getBoundingClientRect(); mouseX = e.clientX - r.left; mouseY = e.clientY - r.top; });
-      canvas.addEventListener('click', () => { if (gameState === 'playing') releaseBall(); });
+    }
 
-      document.getElementById('name-input').addEventListener('keydown', e => {
-        if (e.key === 'Enter') startGame();
-      });
+    function buildBricks() {
+      bricks = [];
+      for (let i = 0; i < 2; i++) addBrickRow();
+    }
 
-      function releaseBall() {
-        const attached = balls.filter(b => b.attached);
-        if (attached.length === 0) return;
-        if (!isAiming) return;
-        isAiming = false;
-        const spd = 7;
-        const vx = Math.cos(aimAngle) * spd;
-        const vy = Math.sin(aimAngle) * spd;
-        attached.forEach((b, i) => {
-          setTimeout(() => {
-            b.vx = vx; b.vy = vy; b.attached = false;
-          }, i * 120);
+    let particles = [], flashes = [];
+
+    function spawnParticles(x, y, color, n = 8) {
+      for (let i = 0; i < n; i++) {
+        const a = Math.random() * Math.PI * 2;
+        const sp = 1 + Math.random() * 4;
+        particles.push({
+          x, y,
+          vx: Math.cos(a) * sp,
+          vy: Math.sin(a) * sp,
+          life: 1,
+          decay: 0.04 + Math.random() * 0.04,
+          r: 2 + Math.random() * 3,
+          color
         });
       }
+    }
 
-      // ─── Physics ──────────────────────────────────────
-      function updatePaddle() {
-        // 조준 중일 때 마우스 위치로 각도 업데이트
-        if (isAiming && mouseX !== null) {
-          const dx = mouseX - LAUNCH_X;
-          const dy = mouseY - LAUNCH_Y;
-          aimAngle = Math.atan2(dy, dx);
-          // 위쪽 반원만 허용 (아래로 못 쏘게)
-          aimAngle = Math.max(-Math.PI * 0.95, Math.min(-Math.PI * 0.05, aimAngle));
-        }
+    function addFlash(x, y, text, color) {
+      flashes.push({ x, y, text, color, life: 1, vy: -1.2 });
+    }
+
+    const keys = {};
+    let mouseX = null, mouseY = null;
+
+    document.addEventListener("keydown", e => {
+      keys[e.code] = true;
+
+      if (e.code === "Space") {
+        e.preventDefault();
+        if (gameState === "playing") releaseBall();
       }
 
-      function updateBalls() {
-        balls.forEach(ball => {
-          if (ball.attached) {
-            ball.x = LAUNCH_X;
-            ball.y = LAUNCH_Y;
+      if (e.code === "KeyQ") {
+        e.preventDefault();
+        quitGame();
+      }
+
+      if (["ArrowLeft", "ArrowRight"].includes(e.code)) e.preventDefault();
+    });
+
+    document.addEventListener("keyup", e => {
+      keys[e.code] = false;
+    });
+
+    canvas.addEventListener("mousemove", e => {
+      const r = canvas.getBoundingClientRect();
+      mouseX = e.clientX - r.left;
+      mouseY = e.clientY - r.top;
+    });
+
+    canvas.addEventListener("click", () => {
+      if (gameState === "playing") releaseBall();
+    });
+
+    document.getElementById("name-input").addEventListener("keydown", e => {
+      if (e.key === "Enter") startGame();
+    });
+
+    function releaseBall() {
+      const attached = balls.filter(b => b.attached);
+      if (attached.length === 0 || !isAiming) return;
+
+      isAiming = false;
+      const spd = 7;
+      const vx = Math.cos(aimAngle) * spd;
+      const vy = Math.sin(aimAngle) * spd;
+
+      attached.forEach((b, i) => {
+        setTimeout(() => {
+          b.vx = vx;
+          b.vy = vy;
+          b.attached = false;
+        }, i * 120);
+      });
+    }
+
+    function updatePaddle() {
+      if (isAiming && mouseX !== null) {
+        const dx = mouseX - LAUNCH_X;
+        const dy = mouseY - LAUNCH_Y;
+        aimAngle = Math.atan2(dy, dx);
+        aimAngle = Math.max(-Math.PI * 0.95, Math.min(-Math.PI * 0.05, aimAngle));
+      }
+    }
+
+    function updateBalls() {
+      balls.forEach(ball => {
+        if (ball.attached) {
+          ball.x = LAUNCH_X;
+          ball.y = LAUNCH_Y;
+          return;
+        }
+
+        ball.trail.push({ x: ball.x, y: ball.y });
+        if (ball.trail.length > 10) ball.trail.shift();
+
+        ball.x += ball.vx;
+        ball.y += ball.vy;
+
+        if (ball.x - ball.r < 0) {
+          ball.x = ball.r;
+          ball.vx = Math.abs(ball.vx);
+        }
+        if (ball.x + ball.r > W) {
+          ball.x = W - ball.r;
+          ball.vx = -Math.abs(ball.vx);
+        }
+        if (ball.y - ball.r < 0) {
+          ball.y = ball.r;
+          ball.vy = Math.abs(ball.vy);
+        }
+
+        for (let i = 0; i < bricks.length; i++) {
+          const brick = bricks[i];
+          if (!brick.alive) continue;
+
+          if (
+            ball.x + ball.r > brick.x &&
+            ball.x - ball.r < brick.x + brick.w &&
+            ball.y + ball.r > brick.y &&
+            ball.y - ball.r < brick.y + brick.h
+          ) {
+            brick.hp--;
+            const cx = brick.x + brick.w / 2;
+            const cy = brick.y + brick.h / 2;
+
+            if (brick.hp <= 0) {
+              brick.alive = false;
+              score += brick.color.pts;
+              spawnParticles(cx, cy, brick.color.fill, 12);
+              addFlash(cx, cy - 10, "+" + brick.color.pts, brick.color.fill);
+            } else {
+              spawnParticles(cx, cy, brick.color.fill, 4);
+            }
+
+            const oL = ball.x + ball.r - brick.x;
+            const oR = brick.x + brick.w - (ball.x - ball.r);
+            const oT = ball.y + ball.r - brick.y;
+            const oB = brick.y + brick.h - (ball.y - ball.r);
+
+            if (Math.min(oL, oR) < Math.min(oT, oB)) ball.vx *= -1;
+            else ball.vy *= -1;
+
+            break;
+          }
+        }
+
+        if (ball.y - ball.r > H) ball.dead = true;
+      });
+
+      balls = balls.filter(b => !b.dead);
+
+      if (balls.filter(b => !b.attached).length === 0 && gameState === "playing") {
+        if (balls.length === 0) {
+          nextBallCount++;
+          isAiming = true;
+          addBrickRow();
+
+          if (bricks.some(b => b.alive && b.y + b.h >= LAUNCH_Y - 5)) {
+            doGameOver("dead");
             return;
           }
 
-          ball.trail.push({ x: ball.x, y: ball.y });
-          if (ball.trail.length > 10) ball.trail.shift();
-
-          ball.x += ball.vx; ball.y += ball.vy;
-
-          if (ball.x - ball.r < 0) { ball.x = ball.r; ball.vx = Math.abs(ball.vx); }
-          if (ball.x + ball.r > W) { ball.x = W - ball.r; ball.vx = -Math.abs(ball.vx); }
-          if (ball.y - ball.r < 0) { ball.y = ball.r; ball.vy = Math.abs(ball.vy); }
-
-          // Bricks
-          for (let i = 0; i < bricks.length; i++) {
-            const brick = bricks[i];
-            if (!brick.alive) continue;
-            if (ball.x + ball.r > brick.x && ball.x - ball.r < brick.x + brick.w &&
-              ball.y + ball.r > brick.y && ball.y - ball.r < brick.y + brick.h) {
-              brick.hp--;
-              const cx = brick.x + brick.w / 2, cy = brick.y + brick.h / 2;
-              if (brick.hp <= 0) {
-                brick.alive = false;
-                score += brick.color.pts;
-                spawnParticles(cx, cy, brick.color.fill, 12);
-                addFlash(cx, cy - 10, '+' + brick.color.pts, brick.color.fill);
-              } else {
-                spawnParticles(cx, cy, brick.color.fill, 4);
-              }
-              const oL = ball.x + ball.r - brick.x, oR = brick.x + brick.w - (ball.x - ball.r);
-              const oT = ball.y + ball.r - brick.y, oB = brick.y + brick.h - (ball.y - ball.r);
-              if (Math.min(oL, oR) < Math.min(oT, oB)) ball.vx *= -1; else ball.vy *= -1;
-              break;
-            }
-          }
-
-          if (ball.y - ball.r > H) ball.dead = true;
-        });
-
-        balls = balls.filter(b => !b.dead);
-
-        // 날아다니는 공이 모두 사라지면 → 새 줄 추가 + 다음 발사 준비
-        if (balls.filter(b => !b.attached).length === 0 && gameState === 'playing') {
-          if (balls.length === 0) { // attached 공도 없음 = 이번 라운드 완전히 끝
-            nextBallCount++;
-            isAiming = true;
-            addBrickRow();
-            if (bricks.some(b => b.alive && b.y + b.h >= LAUNCH_Y - 5)) {
-              doGameOver(); return;
-            }
-            for (let i = 0; i < nextBallCount; i++) balls.push(makeBall());
-            refreshHud();
-          }
+          for (let i = 0; i < nextBallCount; i++) balls.push(makeBall());
+          refreshHud();
         }
-
-        document.getElementById('score-display').textContent = String(score).padStart(5, '0');
       }
 
-      function loseLife() { /* 탈락 없음 - 공이 바닥에 떨어져도 계속 */ }
+      document.getElementById("score-display").textContent = String(score).padStart(5, "0");
+    }
 
-      function checkWin() {
-        // 이 모드는 무한 진행 - 벽돌 다 깨도 계속 (addBrickRow로 계속 추가됨)
-      }
-
-      async function doGameOver() {
-        gameState = 'gameover';
-
-        try {
-          if (window.fbSave) {
-            await window.fbSave(currentPlayer, score);
-          }
-        } catch (e) {
-          console.error("게임오버 저장 실패:", e);
-        }
-
-        // 로컬 백업
-        let board = lbLoad();
-        board.push({ name: currentPlayer.slice(0, 10).toUpperCase(), score });
-        board.sort((a, b) => b.score - a.score);
-        board = board.slice(0, 10);
-        try { localStorage.setItem(LS_KEY, JSON.stringify(board)); } catch (e) { }
-
-        document.getElementById('fs-name').textContent = currentPlayer;
-        document.getElementById('fs-score').textContent = String(score).padStart(5, '0');
-        document.getElementById('fs-detail').textContent = `BALLS ${nextBallCount}  ·  GAME OVER`;
-
-        if (window.fbLoad) {
-          try {
-            const rows = await window.fbLoad();
-            window._fbBoard = rows;
-            lbRender('lb-go-wrap', currentPlayer, score);
-            lbRender('lb-start-wrap', currentPlayer, score);
-          } catch (e) {
-            console.error("fbLoad error:", e);
-            lbRender('lb-go-wrap', currentPlayer, score);
-          }
-        } else {
-          lbRender('lb-go-wrap', currentPlayer, score);
-        }
-
-        document.getElementById('ov-gameover').style.display = 'flex';
-      }
-
-      // ─── Draw ──────────────────────────────────────────
-      function drawGrid() {
-        ctx.save();
-        ctx.strokeStyle = 'rgba(26,42,108,0.3)'; ctx.lineWidth = 0.5;
-        for (let x = 0; x < W; x += 26) { ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, H); ctx.stroke(); }
-        for (let y = 0; y < H; y += 26) { ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(W, y); ctx.stroke(); }
-        ctx.restore();
-      }
-
-      function drawBricks() {
-        bricks.forEach(b => {
-          if (!b.alive) return;
-          const dmg = b.hp < b.maxHp;
-          ctx.save();
-          ctx.shadowColor = b.color.glow; ctx.shadowBlur = dmg ? 4 : 12;
-          ctx.globalAlpha = dmg ? 0.5 : 1;
-          ctx.fillStyle = b.color.fill;
-          ctx.fillRect(b.x + 1, b.y + 1, b.w - 2, b.h - 2);
-          ctx.globalAlpha = dmg ? 0.1 : 0.25;
-          const sh = ctx.createLinearGradient(b.x, b.y, b.x, b.y + b.h);
-          sh.addColorStop(0, '#fff'); sh.addColorStop(1, 'transparent');
-          ctx.fillStyle = sh;
-          ctx.fillRect(b.x + 1, b.y + 1, b.w - 2, b.h / 2);
-          ctx.restore();
-          // HP 숫자 표시 (2방 이상일 때)
-          if (b.maxHp > 1) {
-            ctx.save();
-            ctx.font = `bold ${b.h * 0.55}px 'Orbitron', monospace`;
-            ctx.textAlign = 'center';
-            ctx.textBaseline = 'middle';
-            ctx.fillStyle = b.hp < b.maxHp ? 'rgba(255,255,255,0.4)' : 'rgba(255,255,255,0.9)';
-            ctx.shadowColor = '#000';
-            ctx.shadowBlur = 4;
-            ctx.fillText(b.hp, b.x + b.w / 2, b.y + b.h / 2);
-            ctx.restore();
-          }
-          if (dmg) {
-            ctx.strokeStyle = 'rgba(0,0,0,0.6)'; ctx.lineWidth = 1;
-            ctx.beginPath(); ctx.moveTo(b.x + b.w * 0.3, b.y); ctx.lineTo(b.x + b.w * 0.5, b.y + b.h); ctx.stroke();
-          }
-        });
-      }
-
-      function drawAimLine() {
-        if (!isAiming || balls.filter(b => b.attached).length === 0) return;
-        const spd = 220;
-        const tx = LAUNCH_X + Math.cos(aimAngle) * spd;
-        const ty = LAUNCH_Y + Math.sin(aimAngle) * spd;
-        ctx.save();
-        ctx.strokeStyle = 'rgba(0,245,255,0.6)';
-        ctx.lineWidth = 2;
-        ctx.setLineDash([8, 8]);
-        ctx.shadowColor = '#00f5ff';
-        ctx.shadowBlur = 8;
+    function drawGrid() {
+      ctx.save();
+      ctx.strokeStyle = "rgba(26,42,108,0.3)";
+      ctx.lineWidth = 0.5;
+      for (let x = 0; x < W; x += 26) {
         ctx.beginPath();
-        ctx.moveTo(LAUNCH_X, LAUNCH_Y);
-        ctx.lineTo(tx, ty);
+        ctx.moveTo(x, 0);
+        ctx.lineTo(x, H);
         ctx.stroke();
-        ctx.setLineDash([]);
-        ctx.fillStyle = 'rgba(0,245,255,0.8)';
-        ctx.beginPath();
-        ctx.arc(tx, ty, 4, 0, Math.PI * 2);
-        ctx.fill();
-        ctx.restore();
       }
-
-      function drawPaddle() { /* 패들 없음 - 발사 위치 점만 */
-        ctx.save();
-        ctx.fillStyle = '#00f5ff';
-        ctx.shadowColor = '#00f5ff';
-        ctx.shadowBlur = 16;
+      for (let y = 0; y < H; y += 26) {
         ctx.beginPath();
-        ctx.arc(LAUNCH_X, LAUNCH_Y, 8, 0, Math.PI * 2);
-        ctx.fill();
-        ctx.restore();
-        return;
-        ctx.save();
-        ctx.shadowColor = 'rgba(0,245,255,0.8)'; ctx.shadowBlur = 20;
-        const g = ctx.createLinearGradient(paddle.x, paddle.y, paddle.x, paddle.y + paddle.h);
-        g.addColorStop(0, '#00f5ff'); g.addColorStop(1, '#007aff');
-        ctx.fillStyle = g; ctx.beginPath();
-        ctx.roundRect(paddle.x, paddle.y, paddle.w, paddle.h, 6); ctx.fill();
-        ctx.globalAlpha = 0.4; ctx.fillStyle = '#fff';
-        ctx.beginPath(); ctx.roundRect(paddle.x + 4, paddle.y + 2, paddle.w - 8, paddle.h / 2 - 1, 3); ctx.fill();
-        ctx.restore();
+        ctx.moveTo(0, y);
+        ctx.lineTo(W, y);
+        ctx.stroke();
       }
+      ctx.restore();
+    }
 
-      function drawBall(ball) {
-        ball.trail.forEach((pt, i) => {
-          ctx.save(); ctx.globalAlpha = (i / ball.trail.length) * 0.3; ctx.fillStyle = '#00f5ff';
-          ctx.beginPath(); ctx.arc(pt.x, pt.y, ball.r * (i / ball.trail.length), 0, Math.PI * 2); ctx.fill();
+    function drawBricks() {
+      bricks.forEach(b => {
+        if (!b.alive) return;
+
+        const dmg = b.hp < b.maxHp;
+
+        ctx.save();
+        ctx.shadowColor = b.color.glow;
+        ctx.shadowBlur = dmg ? 4 : 12;
+        ctx.globalAlpha = dmg ? 0.5 : 1;
+        ctx.fillStyle = b.color.fill;
+        ctx.fillRect(b.x + 1, b.y + 1, b.w - 2, b.h - 2);
+
+        ctx.globalAlpha = dmg ? 0.1 : 0.25;
+        const sh = ctx.createLinearGradient(b.x, b.y, b.x, b.y + b.h);
+        sh.addColorStop(0, "#fff");
+        sh.addColorStop(1, "transparent");
+        ctx.fillStyle = sh;
+        ctx.fillRect(b.x + 1, b.y + 1, b.w - 2, b.h / 2);
+        ctx.restore();
+
+        if (b.maxHp > 1) {
+          ctx.save();
+          ctx.font = `bold ${b.h * 0.55}px 'Orbitron', monospace`;
+          ctx.textAlign = "center";
+          ctx.textBaseline = "middle";
+          ctx.fillStyle = b.hp < b.maxHp ? "rgba(255,255,255,0.4)" : "rgba(255,255,255,0.9)";
+          ctx.shadowColor = "#000";
+          ctx.shadowBlur = 4;
+          ctx.fillText(b.hp, b.x + b.w / 2, b.y + b.h / 2);
           ctx.restore();
-        });
-        ctx.save();
-        ctx.shadowColor = 'rgba(0,245,255,1)'; ctx.shadowBlur = 18;
-        const g = ctx.createRadialGradient(ball.x - 2, ball.y - 2, 1, ball.x, ball.y, ball.r);
-        g.addColorStop(0, '#fff'); g.addColorStop(0.5, '#00f5ff'); g.addColorStop(1, '#007aff');
-        ctx.fillStyle = g; ctx.beginPath(); ctx.arc(ball.x, ball.y, ball.r, 0, Math.PI * 2); ctx.fill();
-        ctx.restore();
-      }
+        }
 
-      function drawParticles() {
+        if (dmg) {
+          ctx.strokeStyle = "rgba(0,0,0,0.6)";
+          ctx.lineWidth = 1;
+          ctx.beginPath();
+          ctx.moveTo(b.x + b.w * 0.3, b.y);
+          ctx.lineTo(b.x + b.w * 0.5, b.y + b.h);
+          ctx.stroke();
+        }
+      });
+    }
+
+    function drawAimLine() {
+      if (!isAiming || balls.filter(b => b.attached).length === 0) return;
+
+      const spd = 220;
+      const tx = LAUNCH_X + Math.cos(aimAngle) * spd;
+      const ty = LAUNCH_Y + Math.sin(aimAngle) * spd;
+
+      ctx.save();
+      ctx.strokeStyle = "rgba(0,245,255,0.6)";
+      ctx.lineWidth = 2;
+      ctx.setLineDash([8, 8]);
+      ctx.shadowColor = "#00f5ff";
+      ctx.shadowBlur = 8;
+      ctx.beginPath();
+      ctx.moveTo(LAUNCH_X, LAUNCH_Y);
+      ctx.lineTo(tx, ty);
+      ctx.stroke();
+      ctx.setLineDash([]);
+      ctx.fillStyle = "rgba(0,245,255,0.8)";
+      ctx.beginPath();
+      ctx.arc(tx, ty, 4, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.restore();
+    }
+
+    function drawPaddle() {
+      ctx.save();
+      ctx.fillStyle = "#00f5ff";
+      ctx.shadowColor = "#00f5ff";
+      ctx.shadowBlur = 16;
+      ctx.beginPath();
+      ctx.arc(LAUNCH_X, LAUNCH_Y, 8, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.restore();
+    }
+
+    function drawBall(ball) {
+      ball.trail.forEach((pt, i) => {
+        ctx.save();
+        ctx.globalAlpha = (i / ball.trail.length) * 0.3;
+        ctx.fillStyle = "#00f5ff";
+        ctx.beginPath();
+        ctx.arc(pt.x, pt.y, ball.r * (i / ball.trail.length), 0, Math.PI * 2);
+        ctx.fill();
+        ctx.restore();
+      });
+
+      ctx.save();
+      ctx.shadowColor = "rgba(0,245,255,1)";
+      ctx.shadowBlur = 18;
+      const g = ctx.createRadialGradient(ball.x - 2, ball.y - 2, 1, ball.x, ball.y, ball.r);
+      g.addColorStop(0, "#fff");
+      g.addColorStop(0.5, "#00f5ff");
+      g.addColorStop(1, "#007aff");
+      ctx.fillStyle = g;
+      ctx.beginPath();
+      ctx.arc(ball.x, ball.y, ball.r, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.restore();
+    }
+
+    function drawParticles() {
+      particles.forEach(p => {
+        ctx.save();
+        ctx.globalAlpha = p.life;
+        ctx.shadowColor = p.color;
+        ctx.shadowBlur = 8;
+        ctx.fillStyle = p.color;
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, p.r * p.life, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.restore();
+      });
+    }
+
+    function drawFlashes() {
+      flashes.forEach(f => {
+        ctx.save();
+        ctx.globalAlpha = f.life;
+        ctx.font = `bold 13px 'Orbitron',monospace`;
+        ctx.fillStyle = f.color;
+        ctx.shadowColor = f.color;
+        ctx.shadowBlur = 12;
+        ctx.textAlign = "center";
+        ctx.fillText(f.text, f.x, f.y);
+        ctx.restore();
+      });
+    }
+
+    function refreshHud() {
+      document.getElementById("score-display").textContent = String(score).padStart(5, "0");
+      document.getElementById("player-display").textContent = currentPlayer;
+      document.getElementById("lives-display").textContent = nextBallCount;
+      document.getElementById("btn-quit").style.display = gameState === "playing" ? "inline-block" : "none";
+    }
+
+    function loop() {
+      ctx.clearRect(0, 0, W, H);
+      drawGrid();
+
+      if (gameState === "playing") {
+        updatePaddle();
+        updateBalls();
+
         particles.forEach(p => {
-          ctx.save(); ctx.globalAlpha = p.life; ctx.shadowColor = p.color; ctx.shadowBlur = 8;
-          ctx.fillStyle = p.color; ctx.beginPath(); ctx.arc(p.x, p.y, p.r * p.life, 0, Math.PI * 2); ctx.fill();
-          ctx.restore();
+          p.x += p.vx;
+          p.y += p.vy;
+          p.vy += 0.08;
+          p.life -= p.decay;
         });
-      }
+        particles = particles.filter(p => p.life > 0);
 
-      function drawFlashes() {
         flashes.forEach(f => {
-          ctx.save(); ctx.globalAlpha = f.life; ctx.font = `bold 13px 'Orbitron',monospace`;
-          ctx.fillStyle = f.color; ctx.shadowColor = f.color; ctx.shadowBlur = 12;
-          ctx.textAlign = 'center'; ctx.fillText(f.text, f.x, f.y); ctx.restore();
+          f.y += f.vy;
+          f.life -= 0.025;
         });
+        flashes = flashes.filter(f => f.life > 0);
       }
 
-      // ─── HUD ──────────────────────────────────────────
-      function refreshHud() {
-        document.getElementById('score-display').textContent = String(score).padStart(5, '0');
-        document.getElementById('player-display').textContent = currentPlayer;
-        document.getElementById('lives-display').textContent = nextBallCount;
+      drawBricks();
+      drawPaddle();
+      drawAimLine();
+      balls.forEach(drawBall);
+      drawParticles();
+      drawFlashes();
+
+      requestAnimationFrame(loop);
+    }
+
+    async function saveCurrentScore() {
+      const cleanName = sanitizeName(currentPlayer);
+
+      if (!cleanName) throw new Error("플레이어 이름이 없습니다.");
+
+      if (window.fbSave) {
+        await window.fbSave(cleanName, score);
       }
 
-      // ─── Main Loop ────────────────────────────────────
-      function loop() {
-        ctx.clearRect(0, 0, W, H);
-        drawGrid();
+      lbSaveLocal(cleanName, score);
 
-        if (gameState === 'playing') {
-          updatePaddle(); updateBalls();
-          particles.forEach(p => { p.x += p.vx; p.y += p.vy; p.vy += 0.08; p.life -= p.decay; });
-          particles = particles.filter(p => p.life > 0);
-          flashes.forEach(f => { f.y += f.vy; f.life -= 0.025; });
-          flashes = flashes.filter(f => f.life > 0);
+      if (window.fbLoad) {
+        const rows = await window.fbLoad();
+        window._fbBoard = rows;
+      } else {
+        window._fbBoard = lbLoad();
+      }
+
+      return cleanName;
+    }
+
+    async function endGame(mode = "dead") {
+      if (isEndingGame) return;
+      isEndingGame = true;
+
+      gameState = "gameover";
+      gameOverMode = mode;
+
+      try {
+        const savedName = await saveCurrentScore();
+
+        document.getElementById("fs-name").textContent = savedName;
+        document.getElementById("fs-score").textContent = String(score).padStart(5, "0");
+
+        if (mode === "quit") {
+          document.getElementById("gameover-title").textContent = "GAME ENDED";
+          document.getElementById("fs-detail").textContent = `BALLS ${nextBallCount}  ·  QUIT & SAVED`;
+        } else {
+          document.getElementById("gameover-title").textContent = "GAME OVER";
+          document.getElementById("fs-detail").textContent = `BALLS ${nextBallCount}  ·  GAME OVER`;
         }
 
-        drawBricks(); drawPaddle(); drawAimLine(); balls.forEach(drawBall); drawParticles(); drawFlashes();
-        requestAnimationFrame(loop);
+        lbRender("lb-go-wrap", savedName, score);
+        lbRender("lb-start-wrap", savedName, score);
+      } catch (e) {
+        console.error("점수 저장/종료 처리 실패:", e);
+        document.getElementById("fs-name").textContent = currentPlayer;
+        document.getElementById("fs-score").textContent = String(score).padStart(5, "0");
+        document.getElementById("fs-detail").textContent = "SCORE SAVE FAILED";
+        lbRender("lb-go-wrap", null, null);
       }
 
-      // ─── Flow ─────────────────────────────────────────
-      function startGame() {
-        const raw = document.getElementById('name-input').value.trim();
-        if (!raw) {
-          const warn = document.getElementById('name-warn');
-          warn.style.opacity = '1';
-          document.getElementById('name-input').focus();
-          setTimeout(() => { warn.style.opacity = '0'; }, 2000);
-          return;
-        }
-        currentPlayer = raw.toUpperCase().slice(0, 10);
-        score = 0; lives = 1;
-        nextBallCount = 1; isAiming = true; buildBricks(); balls = [makeBall()]; particles = []; flashes = [];
-        gameState = 'playing';
-        document.getElementById('ov-start').style.display = 'none';
-        refreshHud();
+      document.getElementById("btn-quit").style.display = "none";
+      document.getElementById("ov-gameover").style.display = "flex";
+      isEndingGame = false;
+    }
+
+    function doGameOver(mode = "dead") {
+      endGame(mode);
+    }
+
+    function startGame() {
+      const raw = document.getElementById("name-input").value;
+      const clean = sanitizeName(raw);
+
+      if (!clean) {
+        const warn = document.getElementById("name-warn");
+        warn.style.opacity = "1";
+        document.getElementById("name-input").focus();
+        setTimeout(() => { warn.style.opacity = "0"; }, 2000);
+        return;
       }
 
-      function restartGame() {
-        score = 0; lives = 1;
-        nextBallCount = 1; isAiming = true; buildBricks(); balls = [makeBall()]; particles = []; flashes = [];
-        gameState = 'playing';
-        document.getElementById('ov-gameover').style.display = 'none';
-        refreshHud();
+      currentPlayer = clean;
+      score = 0;
+      lives = 1;
+      nextBallCount = 1;
+      isAiming = true;
+      buildBricks();
+      balls = [makeBall()];
+      particles = [];
+      flashes = [];
+      gameState = "playing";
+
+      document.getElementById("ov-start").style.display = "none";
+      document.getElementById("ov-gameover").style.display = "none";
+      document.getElementById("ov-win").style.display = "none";
+
+      refreshHud();
+    }
+
+    function restartGame() {
+      score = 0;
+      lives = 1;
+      nextBallCount = 1;
+      isAiming = true;
+      buildBricks();
+      balls = [makeBall()];
+      particles = [];
+      flashes = [];
+      gameState = "playing";
+
+      document.getElementById("ov-gameover").style.display = "none";
+      refreshHud();
+    }
+
+    function goToTitle() {
+      document.getElementById("ov-gameover").style.display = "none";
+      document.getElementById("ov-start").style.display = "flex";
+      document.getElementById("btn-quit").style.display = "none";
+      lbRender("lb-start-wrap");
+      gameState = "idle";
+    }
+
+    function quitGame() {
+      if (gameState !== "playing") return;
+
+      const ok = confirm("게임을 그만두시겠습니까?\n현재 점수가 랭킹에 저장됩니다.");
+      if (!ok) return;
+
+      doGameOver("quit");
+    }
+
+    function nextLevel() {
+      document.getElementById("ov-win").style.display = "none";
+    }
+
+    lbRender("lb-start-wrap");
+    loop();
+
+    (function () {
+      const leftBtn = document.getElementById("touch-left");
+      const rightBtn = document.getElementById("touch-right");
+      const fireBtn = document.getElementById("touch-fire");
+
+      function onLeft(down) {
+        keys["ArrowLeft"] = down;
+        down ? leftBtn.classList.add("active") : leftBtn.classList.remove("active");
       }
 
-      function goToTitle() {
-        document.getElementById('ov-gameover').style.display = 'none';
-        document.getElementById('ov-start').style.display = 'flex';
-        lbRender('lb-start-wrap');
-        gameState = 'idle';
+      function onRight(down) {
+        keys["ArrowRight"] = down;
+        down ? rightBtn.classList.add("active") : rightBtn.classList.remove("active");
       }
 
+      function onFire() {
+        if (gameState === "playing") releaseBall();
+        fireBtn.classList.add("active");
+        setTimeout(() => fireBtn.classList.remove("active"), 120);
+      }
 
+      leftBtn.addEventListener("touchstart", e => { e.preventDefault(); onLeft(true); }, { passive: false });
+      leftBtn.addEventListener("touchend", e => { e.preventDefault(); onLeft(false); }, { passive: false });
+      leftBtn.addEventListener("touchcancel", e => { e.preventDefault(); onLeft(false); }, { passive: false });
 
-      // ─── Init ─────────────────────────────────────────
-      lbRender('lb-start-wrap');
-      loop();
+      rightBtn.addEventListener("touchstart", e => { e.preventDefault(); onRight(true); }, { passive: false });
+      rightBtn.addEventListener("touchend", e => { e.preventDefault(); onRight(false); }, { passive: false });
+      rightBtn.addEventListener("touchcancel", e => { e.preventDefault(); onRight(false); }, { passive: false });
 
-      // ─── Touch Controls ───────────────────────────────
-      (function () {
-        const leftBtn = document.getElementById('touch-left');
-        const rightBtn = document.getElementById('touch-right');
-        const fireBtn = document.getElementById('touch-fire');
+      fireBtn.addEventListener("touchstart", e => { e.preventDefault(); onFire(); }, { passive: false });
 
-        function onLeft(down) { keys['ArrowLeft'] = down; if (down) leftBtn.classList.add('active'); else leftBtn.classList.remove('active'); }
-        function onRight(down) { keys['ArrowRight'] = down; if (down) rightBtn.classList.add('active'); else rightBtn.classList.remove('active'); }
-        function onFire() { if (gameState === 'playing') releaseBall(); fireBtn.classList.add('active'); setTimeout(() => fireBtn.classList.remove('active'), 120); }
+      let lastTouchX = null;
 
-        // Button events
-        leftBtn.addEventListener('touchstart', e => { e.preventDefault(); onLeft(true); }, { passive: false });
-        leftBtn.addEventListener('touchend', e => { e.preventDefault(); onLeft(false); }, { passive: false });
-        leftBtn.addEventListener('touchcancel', e => { e.preventDefault(); onLeft(false); }, { passive: false });
-        rightBtn.addEventListener('touchstart', e => { e.preventDefault(); onRight(true); }, { passive: false });
-        rightBtn.addEventListener('touchend', e => { e.preventDefault(); onRight(false); }, { passive: false });
-        rightBtn.addEventListener('touchcancel', e => { e.preventDefault(); onRight(false); }, { passive: false });
-        fireBtn.addEventListener('touchstart', e => { e.preventDefault(); onFire(); }, { passive: false });
+      canvas.addEventListener("touchstart", e => {
+        e.preventDefault();
+        const rect = canvas.getBoundingClientRect();
+        const scaleX = canvas.width / rect.width;
+        const scaleY = canvas.height / rect.height;
+        mouseX = (e.touches[0].clientX - rect.left) * scaleX;
+        mouseY = (e.touches[0].clientY - rect.top) * scaleY;
+        lastTouchX = e.touches[0].clientX;
+      }, { passive: false });
 
-        // Canvas swipe: drag finger to move paddle directly
-        let lastTouchX = null;
-        canvas.addEventListener('touchstart', e => {
-          e.preventDefault();
-          const rect = canvas.getBoundingClientRect();
-          const scaleX = canvas.width / rect.width;
-          const scaleY = canvas.height / rect.height;
-          mouseX = (e.touches[0].clientX - rect.left) * scaleX;
-          mouseY = (e.touches[0].clientY - rect.top) * scaleY;
-          lastTouchX = e.touches[0].clientX;
-        }, { passive: false });
+      canvas.addEventListener("touchmove", e => {
+        e.preventDefault();
+        if (lastTouchX === null) return;
+        const rect = canvas.getBoundingClientRect();
+        const scaleX = canvas.width / rect.width;
+        const scaleY = canvas.height / rect.height;
+        mouseX = (e.touches[0].clientX - rect.left) * scaleX;
+        mouseY = (e.touches[0].clientY - rect.top) * scaleY;
+        lastTouchX = e.touches[0].clientX;
+      }, { passive: false });
 
-        canvas.addEventListener('touchmove', e => {
-          e.preventDefault();
-          if (lastTouchX === null) return;
-          const rect = canvas.getBoundingClientRect();
-          const scaleX = canvas.width / rect.width;
-          const scaleY = canvas.height / rect.height;
-          mouseX = (e.touches[0].clientX - rect.left) * scaleX;
-          mouseY = (e.touches[0].clientY - rect.top) * scaleY;
-          lastTouchX = e.touches[0].clientX;
-        }, { passive: false });
-
-        canvas.addEventListener('touchend', e => {
-          e.preventDefault();
-          if (gameState === 'playing') releaseBall();
-          lastTouchX = null;
-        }, { passive: false });
-      })();
-
-    </script>
+      canvas.addEventListener("touchend", e => {
+        e.preventDefault();
+        if (gameState === "playing") releaseBall();
+        lastTouchX = null;
+      }, { passive: false });
+    })();
+  </script>
 </body>
 
 </html>
